@@ -19,26 +19,25 @@ namespace LoxLang
             if (hadError) Environment.Exit(65);
         }
 
-        private static void run(String source)
+        private static void run(string source)
         {
-            //Scanner scanner = new Scanner(source);
-            //List<Token> tokens = scanner.scanTokens();
-            //// For now, just print the tokens.
-            //for (Token token : tokens)
-            //{
-            //    System.out.println(token);
-            //}
+            Scanner scanner = new Scanner(source);
+            List<Token> tokens = scanner.scanTokens();
+
+            foreach (var token in tokens) 
+            {
+                Console.WriteLine(token);
+            }
+
         }
 
-        static void error(int line, String message)
+        public static void error(int line, string message)
         {
             report(line, "", message);
         }
-        private static void report(int line, String where,
-        String message)
+        private static void report(int line, string where,string message)
         {
-            Console.WriteLine(
-            "[line " + line + "] Error" + where + ": " + message);
+            Console.WriteLine("[line " + line + "] Error" + where + ": " + message);
             hadError = true;
         }
     }
