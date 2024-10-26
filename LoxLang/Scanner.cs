@@ -11,23 +11,25 @@ namespace LoxLang
 
         static Scanner()
         {
-            _keywords = new Dictionary<string, TokenType>();
-            _keywords.Add("and", TokenType.AND);
-            _keywords.Add("class", TokenType.CLASS);
-            _keywords.Add("else", TokenType.ELSE);
-            _keywords.Add("false", TokenType.FALSE);
-            _keywords.Add("for", TokenType.FOR);
-            _keywords.Add("fun", TokenType.FUN);
-            _keywords.Add("if", TokenType.IF);
-            _keywords.Add("nil", TokenType.NIL);
-            _keywords.Add("or", TokenType.OR);
-            _keywords.Add("print", TokenType.PRINT);
-            _keywords.Add("return", TokenType.RETURN);
-            _keywords.Add("super", TokenType.SUPER);
-            _keywords.Add("this", TokenType.THIS);
-            _keywords.Add("true", TokenType.TRUE);
-            _keywords.Add("var", TokenType.VAR);
-            _keywords.Add("while", TokenType.WHILE);
+            _keywords = new Dictionary<string, TokenType>
+            {
+                { "and", TokenType.AND },
+                { "class", TokenType.CLASS },
+                { "else", TokenType.ELSE },
+                { "false", TokenType.FALSE },
+                { "for", TokenType.FOR },
+                { "fun", TokenType.FUN },
+                { "if", TokenType.IF },
+                { "nil", TokenType.NIL },
+                { "or", TokenType.OR },
+                { "print", TokenType.PRINT },
+                { "return", TokenType.RETURN },
+                { "super", TokenType.SUPER },
+                { "this", TokenType.THIS },
+                { "true", TokenType.TRUE },
+                { "var", TokenType.VAR },
+                { "while", TokenType.WHILE }
+            };
         }
 
         //The start field points to the first character in the lexeme being scanned
@@ -128,15 +130,22 @@ namespace LoxLang
         }
         private void identifier()
         {
+            TokenType type;
+
             while (isAlphaNumeric(peek())) 
                 advance();
 
             string text = _source.Substring(_start,_current);
-            TokenType type = _keywords[text];
-            if(type == null)
-                type = TokenType.IDENTIFIER;
 
-            addToken(type);
+            if(!_keywords.ContainsKey(text))
+                addToken(TokenType.IDENTIFIER);
+            else
+            {
+                type = _keywords[text];
+                addToken(type);
+            }
+
+            
         }
 
         private bool isAlpha(char c)
@@ -173,7 +182,9 @@ namespace LoxLang
         {
             while (peek() != '"' && !isAtEnd())
             {
-                if (peek() == '\n') _line++;
+                if (peek() == '\n') 
+                    _line++;
+
                 advance();
             }
             if (isAtEnd())
@@ -184,8 +195,10 @@ namespace LoxLang
             // The closing ".
             advance();
 
+            int start = _start + 1;
+            int end = _current - 1;
             // Trim the surrounding quotes.
-            string value = _source.Substring(_start + 1, _current - 1);
+            string value = _source.Substring(_start + 1, (end - start));
             addToken(TokenType.STRING, value);
         }
 
@@ -218,7 +231,7 @@ namespace LoxLang
 
         private void addToken(TokenType type, object literal)
         {
-            string text = _source.Substring(_start, _current);
+            string text = _source.Substring(_start, (_current - _start));
             _tokens.Add(new Token(type, text, literal, _line));
         }
 

@@ -15,8 +15,11 @@ namespace LoxLang
         private static void RunFile(string path)
         {
             byte[] bytes = File.ReadAllBytes(path);
-            run(Encoding.Default.GetString(bytes));
-            if (hadError) Environment.Exit(65);
+            
+            run(Encoding.UTF8.GetString(bytes));
+
+            if (hadError) 
+                Environment.Exit(65);
         }
 
         private static void run(string source)
