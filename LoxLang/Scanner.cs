@@ -1,15 +1,18 @@
-﻿namespace LoxLang
+﻿
+using System;
+
+namespace LoxLang
 {
     public class Scanner
     {
         private readonly string _source;
         private readonly List<Token> _tokens = new List<Token>();
-        private static readonly Dictionary<string,TokenType> _keywords;
+        private static readonly Dictionary<string, TokenType> _keywords;
 
         static Scanner()
         {
-            _keywords = new Dictionary<string,TokenType>();
-            _keywords.Add("and",TokenType.AND);
+            _keywords = new Dictionary<string, TokenType>();
+            _keywords.Add("and", TokenType.AND);
             _keywords.Add("class", TokenType.CLASS);
             _keywords.Add("else", TokenType.ELSE);
             _keywords.Add("false", TokenType.FALSE);
@@ -102,13 +105,43 @@
                 case '"':
                     stringToken();
                     break;
+                case 'o':
+                    if (peek() == 'r')
+                    {
+                        addToken(TokenType.OR);
+                    }
+                    break;
                 default:
                     if (isDigit(c))
                         number();
+                    else if (isAlpha(c))
+                        identifier();
                     else
                         Program.error(_line, "Unexpected character.");
                     break;
             }
+        }
+
+        private bool isAlphaNumeric(char c)
+        {
+            return isAlpha(c) || isDigit(c);
+        }
+        private void identifier()
+        {
+            while (isAlphaNumeric(peek())) 
+                advance();
+
+            string text = _source.Substring(_start,_current);
+            TokenType type = _keywords[text];
+            if(type == null)
+                type = TokenType.IDENTIFIER;
+
+            addToken(type);
+        }
+
+        private bool isAlpha(char c)
+        {
+            return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
         }
 
         private void number()
@@ -121,7 +154,7 @@
                 advance();
                 while (isDigit(peek())) advance();
             }
-            addToken(TokenType.NUMBER,double.Parse(_source.Substring(_start, _current)));
+            addToken(TokenType.NUMBER, double.Parse(_source.Substring(_start, _current)));
 
         }
 
@@ -152,13 +185,13 @@
             advance();
 
             // Trim the surrounding quotes.
-            String value = _source.Substring(_start + 1, _current - 1);
+            string value = _source.Substring(_start + 1, _current - 1);
             addToken(TokenType.STRING, value);
         }
 
         private char peek()
         {
-            if(isAtEnd())
+            if (isAtEnd())
                 return '\n';
 
             return _source[_current];
@@ -166,7 +199,7 @@
 
         private bool match(char expected)
         {
-            if(isAtEnd())
+            if (isAtEnd())
                 return false;
 
             if (_source[_current] != expected)
@@ -185,8 +218,8 @@
 
         private void addToken(TokenType type, object literal)
         {
-            string text = _source.Substring(_start,_current);
-            _tokens.Add(new Token(type,text,literal,_line));
+            string text = _source.Substring(_start, _current);
+            _tokens.Add(new Token(type, text, literal, _line));
         }
 
         private char advance()
