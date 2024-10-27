@@ -135,7 +135,7 @@ namespace LoxLang
             while (isAlphaNumeric(peek())) 
                 advance();
 
-            string text = _source.Substring(_start,_current);
+            string text = _source.Substring(_start,(_current-_start));
 
             if(!_keywords.ContainsKey(text))
                 addToken(TokenType.IDENTIFIER);
@@ -163,7 +163,7 @@ namespace LoxLang
                 advance();
                 while (isDigit(peek())) advance();
             }
-            addToken(TokenType.NUMBER, double.Parse(_source.Substring(_start, _current)));
+            addToken(TokenType.NUMBER, double.Parse(_source.Substring(_start, (_current - _start))));
 
         }
 
