@@ -15,9 +15,17 @@
             _line = line;
         }
 
+        public TokenType Type => _type;
+
+        public string Lexeme => _lexeme;
+
+        public object Literal => _literal;
+
+        public int Line => _line;
+
         public override string ToString()
         {
-            return _type + " " + _lexeme + " " + _literal;
+            return Type + " " + Lexeme + " " + Literal;
         }
 
     }
