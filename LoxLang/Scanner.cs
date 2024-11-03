@@ -1,6 +1,4 @@
 ﻿
-using System;
-
 namespace LoxLang
 {
     public class Scanner
