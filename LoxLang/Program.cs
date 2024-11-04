@@ -40,6 +40,7 @@ namespace LoxLang
             Scanner scanner = new(source);
             List<Token> tokens = scanner.scanTokens();
             Parser parser  = new Parser(tokens);
+            var expr = parser.parse();
 
             foreach (Token token in tokens)
             {

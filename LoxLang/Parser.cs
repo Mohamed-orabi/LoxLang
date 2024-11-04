@@ -1,6 +1,4 @@
-﻿
-
-namespace LoxLang
+﻿namespace LoxLang
 {
     public class Parser
     {
@@ -18,6 +16,19 @@ namespace LoxLang
         public Parser(List<Token> tokens)
         {
             _tokens = tokens;
+        }
+
+
+        public Expr parse()
+        {
+            try
+            {
+                return expression();
+            }
+            catch (ParseError)
+            {
+                return null;
+            }
         }
 
         private Expr expression()
@@ -118,19 +129,16 @@ namespace LoxLang
             if (match(TokenType.LEFT_PAREN))
             {
                 Expr expr = expression();
-                consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");
+                _ = consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");
                 return new Expr.Grouping(expr);
             }
 
-            return null;
+            throw error(peek(), "Expect expression.");
         }
 
         private Token consume(TokenType token, string message)
         {
-            if (check(token)) 
-                return advance();
-
-            throw error(peek(), message);
+            return check(token) ? advance() : throw error(peek(), message);
         }
 
         private Token previous()
@@ -139,10 +147,38 @@ namespace LoxLang
         }
 
 
-        private ParseError error(Token token, String message)
+        private ParseError error(Token token, string message)
         {
             Program.error(token, message);
             return new ParseError();
+        }
+
+        private void synchronize()
+        {
+            _ = advance();
+
+            while (!isAtEnd())
+            {
+                if (previous().Type == TokenType.SEMICOLON)
+                {
+                    return;
+                }
+
+                switch (peek().Type)
+                {
+                    case TokenType.CLASS:
+                    case TokenType.FUN:
+                    case TokenType.VAR:
+                    case TokenType.FOR:
+                    case TokenType.IF:
+                    case TokenType.WHILE:
+                    case TokenType.PRINT:
+                    case TokenType.RETURN:
+                        return;
+                }
+
+                _ = advance();
+            }
         }
 
         private bool match(params TokenType[] tokens)
