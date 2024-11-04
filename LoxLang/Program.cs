@@ -4,14 +4,14 @@ namespace LoxLang
 {
     internal class Program
     {
-        static bool hadError = false;
+        private static bool hadError = false;
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             //string Path = @"D:\Code.txt";
             //RunFile(Path);
 
-            var expression = new Expr.Binary(new Expr.Unary(
+            Expr.Binary expression = new(new Expr.Unary(
                                                          new Token(TokenType.MINUS, "-", null, 1),
                                                          new Expr.Literal(123)
                                                      ),
@@ -30,15 +30,18 @@ namespace LoxLang
             run(Encoding.UTF8.GetString(bytes));
 
             if (hadError)
+            {
                 Environment.Exit(65);
+            }
         }
 
         private static void run(string source)
         {
-            Scanner scanner = new Scanner(source);
+            Scanner scanner = new(source);
             List<Token> tokens = scanner.scanTokens();
+            Parser parser  = new Parser(tokens);
 
-            foreach (var token in tokens)
+            foreach (Token token in tokens)
             {
                 Console.WriteLine(token);
             }
@@ -54,5 +57,19 @@ namespace LoxLang
             Console.WriteLine("[line " + line + "] Error" + where + ": " + message);
             hadError = true;
         }
+
+        public static void error(Token token, String message)
+        {
+            if (token.Type == TokenType.EOF)
+            {
+                report(token.Line, " at end", message);
+            }
+            else
+            {
+                report(token.Line, " at '" + token.Lexeme + "'", message);
+            }
+        }
+
+
     }
 }

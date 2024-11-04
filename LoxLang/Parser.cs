@@ -1,8 +1,18 @@
 ﻿
+
 namespace LoxLang
 {
     public class Parser
     {
+
+        // Define a private nested class for ParseError.
+        private class ParseError : Exception
+        {
+            public ParseError() : base() { }
+            public ParseError(string message) : base(message) { }
+            public ParseError(string message, Exception inner) : base(message, inner) { }
+        }
+
         public List<Token> _tokens;
         private int current = 0;
         public Parser(List<Token> tokens)
@@ -108,16 +118,31 @@ namespace LoxLang
             if (match(TokenType.LEFT_PAREN))
             {
                 Expr expr = expression();
-                //consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");
+                consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");
                 return new Expr.Grouping(expr);
             }
 
             return null;
         }
 
+        private Token consume(TokenType token, string message)
+        {
+            if (check(token)) 
+                return advance();
+
+            throw error(peek(), message);
+        }
+
         private Token previous()
         {
             return _tokens[current - 1];
+        }
+
+
+        private ParseError error(Token token, String message)
+        {
+            Program.error(token, message);
+            return new ParseError();
         }
 
         private bool match(params TokenType[] tokens)
