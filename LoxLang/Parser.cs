@@ -218,7 +218,10 @@
 
         private bool check(TokenType item)
         {
-            return !isAtEnd() && peek().Type == item;
+            if (isAtEnd()) 
+                return false;
+
+            return  peek().Type == item;
         }
 
 

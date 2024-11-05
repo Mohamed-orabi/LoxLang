@@ -8,19 +8,19 @@ namespace LoxLang
 
         private static void Main(string[] args)
         {
-            //string Path = @"D:\Code.txt";
-            //RunFile(Path);
+            string Path = @"D:\Code.txt";
+            RunFile(Path);
 
-            Expr.Binary expression = new(new Expr.Unary(
-                                                         new Token(TokenType.MINUS, "-", null, 1),
-                                                         new Expr.Literal(123)
-                                                     ),
-                                                     new Token(TokenType.STAR, "*", null, 1),
-                                                     new Expr.Grouping(
-                                                          new Expr.Literal(45.67)
-                                                     ));
+            //Expr.Binary expression = new(new Expr.Unary(
+            //                                             new Token(TokenType.MINUS, "-", null, 1),
+            //                                             new Expr.Literal(123)
+            //                                         ),
+            //                                         new Token(TokenType.STAR, "*", null, 1),
+            //                                         new Expr.Grouping(
+            //                                              new Expr.Literal(45.67)
+            //                                         ));
 
-            Console.WriteLine(new AstPrinter().print(expression));
+            //Console.WriteLine(new AstPrinter().print(expression));
         }
 
         private static void RunFile(string path)
@@ -41,6 +41,8 @@ namespace LoxLang
             List<Token> tokens = scanner.scanTokens();
             Parser parser  = new Parser(tokens);
             var expr = parser.parse();
+
+            Console.WriteLine(new AstPrinter().print(expr));
 
             foreach (Token token in tokens)
             {
