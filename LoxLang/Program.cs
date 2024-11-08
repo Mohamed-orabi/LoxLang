@@ -1,11 +1,12 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 
 namespace LoxLang
 {
     internal class Program
     {
         private static bool hadError = false;
-
+        static bool hadRuntimeError = false;
         private static void Main(string[] args)
         {
             string Path = @"D:\Code.txt";
@@ -33,6 +34,9 @@ namespace LoxLang
             {
                 Environment.Exit(65);
             }
+
+            if (hadRuntimeError)
+                Environment.Exit(65);
         }
 
         private static void run(string source)
@@ -41,13 +45,15 @@ namespace LoxLang
             List<Token> tokens = scanner.scanTokens();
             Parser parser  = new Parser(tokens);
             var expr = parser.parse();
+            Interpreter interpreter = new Interpreter();
+            interpreter.interpret(expr);
 
-            Console.WriteLine(new AstPrinter().print(expr));
+            //Console.WriteLine(new AstPrinter().print(expr));
 
-            foreach (Token token in tokens)
-            {
-                Console.WriteLine(token);
-            }
+            //foreach (Token token in tokens)
+            //{
+            //    Console.WriteLine(token);
+            //}
 
         }
 
@@ -71,6 +77,12 @@ namespace LoxLang
             {
                 report(token.Line, " at '" + token.Lexeme + "'", message);
             }
+        }
+
+        public static void runtimeError(RuntimeError error)
+        {
+            Console.WriteLine(error.Message + "\n[line " + error.Token.Line + "]");
+            hadRuntimeError = true;
         }
 
 
