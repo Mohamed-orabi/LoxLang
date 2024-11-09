@@ -1,4 +1,6 @@
-﻿namespace LoxLang
+﻿using static LoxLang.TokenType;
+
+namespace LoxLang
 {
     public class Parser
     {
@@ -19,7 +21,38 @@
         }
 
 
-        public Expr parse()
+        public List<Stmt> parse()
+        {
+            List<Stmt> result = new List<Stmt>();
+            while(!isAtEnd())
+                result.Add(statement()); 
+
+            return result;
+        }
+
+        private Stmt statement()
+        {
+            if (match(PRINT)) 
+                return printStatement();
+
+            return expressionStatement();
+        }
+
+        private Stmt printStatement()
+        {
+            Expr expr = expression();
+            consume(SEMICOLON, "Expect ';' after value.");
+            return new Stmt.Print(expr);
+        }
+
+        private Stmt expressionStatement()
+        {
+            Expr expr = expression();
+            consume(SEMICOLON, "Expect ';' after expression.");
+            return new Stmt.Expression(expr);
+        }
+
+        public Expr Oldparse()
         {
             try
             {
@@ -129,7 +162,7 @@
             if (match(TokenType.LEFT_PAREN))
             {
                 Expr expr = expression();
-                _ = consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");
+                _ = consume(RIGHT_PAREN, "Expect ')' after expression.");
                 return new Expr.Grouping(expr);
             }
 
@@ -159,21 +192,21 @@
 
             while (!isAtEnd())
             {
-                if (previous().Type == TokenType.SEMICOLON)
+                if (previous().Type == SEMICOLON)
                 {
                     return;
                 }
 
                 switch (peek().Type)
                 {
-                    case TokenType.CLASS:
-                    case TokenType.FUN:
-                    case TokenType.VAR:
-                    case TokenType.FOR:
-                    case TokenType.IF:
-                    case TokenType.WHILE:
-                    case TokenType.PRINT:
-                    case TokenType.RETURN:
+                    case CLASS:
+                    case FUN:
+                    case VAR:
+                    case FOR:
+                    case IF:
+                    case WHILE:
+                    case PRINT:
+                    case RETURN:
                         return;
                 }
 

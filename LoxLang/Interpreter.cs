@@ -3,16 +3,18 @@ using static LoxLang.TokenType;
 
 namespace LoxLang
 {
-    public class Interpreter : Expr.IVisitor<object>
+    public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
     {
 
-        public void interpret(Expr expression)
+        public void interpret(List<Stmt> statements)
         {
             try
             {
-                Object value = evaluate(expression);
-                Console.WriteLine(value.ToString());
-                //System.out.println(stringify(value));
+                foreach (Stmt stmt in statements) 
+                {
+                    execute(stmt);
+                }
+                //Console.WriteLine(value.ToString());
             }
             catch (RuntimeError error)
             {
@@ -20,9 +22,9 @@ namespace LoxLang
             }
         }
 
-        public object VisitAssignExpr(Expr.Assign expr)
+        private void execute(Stmt stmt)
         {
-            throw new NotImplementedException();
+            stmt.Accept(this);
         }
 
         public object VisitBinaryExpr(Expr.Binary expr)
@@ -79,15 +81,7 @@ namespace LoxLang
             return a.Equals(b);
         }
 
-        public object VisitCallExpr(Expr.Call expr)
-        {
-            throw new NotImplementedException();
-        }
-
-        public object VisitGetExpr(Expr.Get expr)
-        {
-            throw new NotImplementedException();
-        }
+        
 
         public object VisitGroupingExpr(Expr.Grouping expr)
         {
@@ -104,25 +98,7 @@ namespace LoxLang
             return expr.value;
         }
 
-        public object VisitLogicalExpr(Expr.Logical expr)
-        {
-            throw new NotImplementedException();
-        }
 
-        public object VisitSetExpr(Expr.Set expr)
-        {
-            throw new NotImplementedException();
-        }
-
-        public object VisitSuperExpr(Expr.Super expr)
-        {
-            throw new NotImplementedException();
-        }
-
-        public object VisitThisExpr(Expr.This expr)
-        {
-            throw new NotImplementedException();
-        }
 
         // Operators: -, +, and *
         // Operands: 5, 3, and 2
@@ -169,9 +145,92 @@ namespace LoxLang
             return true;
         }
 
+        public object VisitExpressionStmt(Stmt.Expression stmt)
+        {
+            evaluate(stmt.expression);
+            return null;
+        }
+
+    
+
+        public object VisitPrintStmt(Stmt.Print stmt)
+        {
+            object value = evaluate(stmt.expression);
+            Console.WriteLine(value);
+            return null;
+        }
+
+
+
+        #region NotUsedYet
+        public object VisitIfStmt(Stmt.If stmt)
+        {
+            throw new NotImplementedException();
+        }
+        public object VisitAssignExpr(Expr.Assign expr)
+        {
+            throw new NotImplementedException();
+        }
+        public object VisitCallExpr(Expr.Call expr)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object VisitGetExpr(Expr.Get expr)
+        {
+            throw new NotImplementedException();
+        }
+        public object VisitLogicalExpr(Expr.Logical expr)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object VisitSetExpr(Expr.Set expr)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object VisitSuperExpr(Expr.Super expr)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object VisitThisExpr(Expr.This expr)
+        {
+            throw new NotImplementedException();
+        }
         public object VisitVariableExpr(Expr.Variable expr)
         {
             throw new NotImplementedException();
         }
+
+        public object VisitBlockStmt(Stmt.Block stmt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object VisitClassStmt(Stmt.Class stmt)
+        {
+            throw new NotImplementedException();
+        }
+        public object VisitFunctionStmt(Stmt.Function stmt)
+        {
+            throw new NotImplementedException();
+        }
+        public object VisitReturnStmt(Stmt.Return stmt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object VisitVarStmt(Stmt.Var stmt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object VisitWhileStmt(Stmt.While stmt)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
     }
 }
