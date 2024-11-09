@@ -3,7 +3,8 @@ using static LoxLang.TokenType;
 
 namespace LoxLang
 {
-    public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
+    public class Interpreter : Expr.IVisitor<object>, 
+                               Stmt.IVisitor<object>
     {
 
         public void interpret(List<Stmt> statements)
@@ -14,7 +15,6 @@ namespace LoxLang
                 {
                     execute(stmt);
                 }
-                //Console.WriteLine(value.ToString());
             }
             catch (RuntimeError error)
             {

@@ -32,18 +32,18 @@ namespace LoxLang
 
             if (hadError)
             {
-                Environment.Exit(65);
+                System.Environment.Exit(65);
             }
 
             if (hadRuntimeError)
-                Environment.Exit(65);
+                System.Environment.Exit(65);
         }
 
         private static void run(string source)
         {
             Scanner scanner = new(source);
             List<Token> tokens = scanner.scanTokens();
-            Parser parser  = new Parser(tokens);
+            Parser parser = new Parser(tokens);
             var expr = parser.parse();
             Interpreter interpreter = new Interpreter();
             interpreter.interpret(expr);
