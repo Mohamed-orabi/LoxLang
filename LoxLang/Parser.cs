@@ -1,5 +1,4 @@
-﻿using static LoxLang.Expr;
-using static LoxLang.TokenType;
+﻿using static LoxLang.TokenType;
 
 namespace LoxLang
 {

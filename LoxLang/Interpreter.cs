@@ -14,7 +14,7 @@ namespace LoxLang
             {
                 foreach (Stmt stmt in statements) 
                 {
-                    execute(stmt);
+                    executeStmt(stmt);
                 }
             }
             catch (RuntimeError error)
@@ -23,15 +23,15 @@ namespace LoxLang
             }
         }
 
-        private void execute(Stmt stmt)
+        private void executeStmt(Stmt stmt)
         {
             stmt.Accept(this);
         }
 
         public object VisitBinaryExpr(Expr.Binary expr)
         {
-            var right = evaluate(expr.right);
-            var left = evaluate(expr.left);
+            var right = executeExpr(expr.right);
+            var left = executeExpr(expr.left);
 
             switch (expr.op.Type)
             {
@@ -86,10 +86,10 @@ namespace LoxLang
 
         public object VisitGroupingExpr(Expr.Grouping expr)
         {
-            return evaluate(expr.expression);
+            return executeExpr(expr.expression);
         }
 
-        private object evaluate(Expr expression)
+        private object executeExpr(Expr expression)
         {
             return expression.Accept(this);
         }
@@ -105,7 +105,7 @@ namespace LoxLang
         // Operands: 5, 3, and 2
         public object VisitUnaryExpr(Expr.Unary expr)
         {
-            object right = evaluate(expr.right);
+            object right = executeExpr(expr.right);
 
             switch (expr.op.Type)
             {
@@ -148,7 +148,7 @@ namespace LoxLang
 
         public object VisitExpressionStmt(Stmt.Expression stmt)
         {
-            evaluate(stmt.expression);
+            executeExpr(stmt.expression);
             return null;
         }
 
@@ -156,7 +156,7 @@ namespace LoxLang
 
         public object VisitPrintStmt(Stmt.Print stmt)
         {
-            object value = evaluate(stmt.expression);
+            object value = executeExpr(stmt.expression);
             Console.WriteLine(value);
             return null;
         }
@@ -166,7 +166,7 @@ namespace LoxLang
             object value = null;
             if (stmt.initializer != null)
             {
-                value = evaluate(stmt.initializer);
+                value = executeExpr(stmt.initializer);
             }
 
             environment.define(stmt.name.Lexeme, value);
@@ -180,7 +180,7 @@ namespace LoxLang
 
         public object VisitAssignExpr(Expr.Assign expr)
         {
-            object value = evaluate(expr.value);
+            object value = executeExpr(expr.value);
             environment.assign(expr.name, value);
             return value;
         }
@@ -201,7 +201,7 @@ namespace LoxLang
 
                 foreach (Stmt stmt in statements) 
                 {
-                    execute(stmt);
+                    executeStmt(stmt);
                 }
                
             }
