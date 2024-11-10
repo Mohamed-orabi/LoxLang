@@ -178,16 +178,45 @@ namespace LoxLang
             return environment.get(expr.name);
         }
 
+        public object VisitAssignExpr(Expr.Assign expr)
+        {
+            object value = evaluate(expr.value);
+            environment.assign(expr.name, value);
+            return value;
+        }
+
+        public object VisitBlockStmt(Stmt.Block stmt)
+        {
+            executeBlock(stmt.statements, new Environment(environment));
+            return null;
+        }
+
+        void executeBlock(List<Stmt> statements,
+                    Environment environment)
+        {
+            Environment previous = this.environment;
+            try
+            {
+                this.environment = environment;
+
+                foreach (Stmt stmt in statements) 
+                {
+                    execute(stmt);
+                }
+               
+            }
+            finally
+            {
+                this.environment = previous;
+            }
+        }
 
         #region NotUsedYet
         public object VisitIfStmt(Stmt.If stmt)
         {
             throw new NotImplementedException();
         }
-        public object VisitAssignExpr(Expr.Assign expr)
-        {
-            throw new NotImplementedException();
-        }
+
         public object VisitCallExpr(Expr.Call expr)
         {
             throw new NotImplementedException();
@@ -218,10 +247,7 @@ namespace LoxLang
         }
 
 
-        public object VisitBlockStmt(Stmt.Block stmt)
-        {
-            throw new NotImplementedException();
-        }
+
 
         public object VisitClassStmt(Stmt.Class stmt)
         {

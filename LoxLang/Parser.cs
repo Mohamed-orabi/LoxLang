@@ -1,4 +1,5 @@
-﻿using static LoxLang.TokenType;
+﻿using static LoxLang.Expr;
+using static LoxLang.TokenType;
 
 namespace LoxLang
 {
@@ -56,7 +57,22 @@ namespace LoxLang
             if (match(PRINT)) 
                 return printStatement();
 
+            if (match(LEFT_BRACE)) return new Stmt.Block(block());
+
             return expressionStatement();
+        }
+
+        private List<Stmt> block()
+        {
+            List<Stmt> statements = new List<Stmt> ();
+
+            while (!check(RIGHT_BRACE) && !isAtEnd())
+            {
+                statements.Add(declaration());
+            }
+
+            consume(RIGHT_BRACE, "Expect '}' after block.");
+            return statements;
         }
 
         private Stmt printStatement()
@@ -87,7 +103,7 @@ namespace LoxLang
 
         private Expr expression()
         {
-            return equality();
+            return assignment();
         }
 
         private Expr equality()
@@ -99,6 +115,26 @@ namespace LoxLang
                 Token op = previous();
                 Expr right = comparison();
                 expr = new Expr.Binary(expr, op, right);
+            }
+
+            return expr;
+        }
+
+        private Expr assignment()
+        {
+            Expr expr = equality();
+
+            if (match(EQUAL))
+            {
+                Token equals = previous();
+                Expr value = assignment();
+
+                if (expr is Expr.Variable) {
+                    Token name = ((Expr.Variable)expr).name;
+                    return new Expr.Assign(name, value);
+                }
+
+                error(equals, "Invalid assignment target.");
             }
 
             return expr;
