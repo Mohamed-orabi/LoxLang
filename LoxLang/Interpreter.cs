@@ -6,6 +6,7 @@ namespace LoxLang
     public class Interpreter : Expr.IVisitor<object>, 
                                Stmt.IVisitor<object>
     {
+        private Environment environment = new Environment();
 
         public void interpret(List<Stmt> statements)
         {
@@ -160,6 +161,22 @@ namespace LoxLang
             return null;
         }
 
+        public object VisitVarStmt(Stmt.Var stmt)
+        {
+            object value = null;
+            if (stmt.initializer != null)
+            {
+                value = evaluate(stmt.initializer);
+            }
+
+            environment.define(stmt.name.Lexeme, value);
+            return null;
+        }
+
+        public object VisitVariableExpr(Expr.Variable expr)
+        {
+            return environment.get(expr.name);
+        }
 
 
         #region NotUsedYet
@@ -199,10 +216,7 @@ namespace LoxLang
         {
             throw new NotImplementedException();
         }
-        public object VisitVariableExpr(Expr.Variable expr)
-        {
-            throw new NotImplementedException();
-        }
+
 
         public object VisitBlockStmt(Stmt.Block stmt)
         {
@@ -222,10 +236,7 @@ namespace LoxLang
             throw new NotImplementedException();
         }
 
-        public object VisitVarStmt(Stmt.Var stmt)
-        {
-            throw new NotImplementedException();
-        }
+
 
         public object VisitWhileStmt(Stmt.While stmt)
         {

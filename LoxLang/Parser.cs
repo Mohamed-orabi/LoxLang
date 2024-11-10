@@ -5,14 +5,6 @@ namespace LoxLang
     public class Parser
     {
 
-        // Define a private nested class for ParseError.
-        private class ParseError : Exception
-        {
-            public ParseError() : base() { }
-            public ParseError(string message) : base(message) { }
-            public ParseError(string message, Exception inner) : base(message, inner) { }
-        }
-
         public List<Token> _tokens;
         private int current = 0;
         public Parser(List<Token> tokens)
@@ -25,9 +17,38 @@ namespace LoxLang
         {
             List<Stmt> result = new List<Stmt>();
             while(!isAtEnd())
-                result.Add(statement()); 
+                result.Add(declaration()); 
 
             return result;
+        }
+
+        private Stmt declaration()
+        {
+            try
+            {
+                if (match(VAR)) return varDeclaration();
+
+                return statement();
+            }
+            catch (ParseError error)
+            {
+                synchronize();
+                return null;
+            }
+        }
+
+        private Stmt varDeclaration()
+        {
+            Token name = consume(IDENTIFIER, "Expect variable name.");
+
+            Expr initializer = null;
+            if (match(EQUAL))
+            {
+                initializer = expression();
+            }
+
+            consume(SEMICOLON, "Expect ';' after variable declaration.");
+            return new Stmt.Var(name, initializer);
         }
 
         private Stmt statement()
@@ -157,6 +178,11 @@ namespace LoxLang
             if (match(TokenType.NUMBER, TokenType.STRING))
             {
                 return new Expr.Literal(previous().Literal);
+            }
+
+            if (match(IDENTIFIER))
+            {
+                return new Expr.Variable(previous());
             }
 
             if (match(TokenType.LEFT_PAREN))
