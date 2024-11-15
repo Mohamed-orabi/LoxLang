@@ -16,8 +16,8 @@ namespace LoxLang
         public List<Stmt> parse()
         {
             List<Stmt> result = new List<Stmt>();
-            while(!isAtEnd())
-                result.Add(declaration()); 
+            while (!isAtEnd())
+                result.Add(declaration());
 
             return result;
         }
@@ -53,7 +53,10 @@ namespace LoxLang
 
         private Stmt statement()
         {
-            if (match(PRINT)) 
+            if (match(IF))
+                return ifStatement();
+
+            if (match(PRINT))
                 return printStatement();
 
             if (match(LEFT_BRACE)) return new Stmt.Block(block());
@@ -61,9 +64,24 @@ namespace LoxLang
             return expressionStatement();
         }
 
+        private Stmt ifStatement()
+        {
+            consume(LEFT_PAREN, "Expect '(' after 'if'.");
+            Expr condition = expression();
+            consume(RIGHT_PAREN, "Expect ')' after if condition.");
+
+            Stmt thenBranch = statement();
+            Stmt elseBranch = null;
+
+            if (match(ELSE))
+                elseBranch = statement();
+
+            return new Stmt.If(condition, thenBranch, elseBranch);
+        }
+
         private List<Stmt> block()
         {
-            List<Stmt> statements = new List<Stmt> ();
+            List<Stmt> statements = new List<Stmt>();
 
             while (!check(RIGHT_BRACE) && !isAtEnd())
             {
@@ -105,6 +123,55 @@ namespace LoxLang
             return assignment();
         }
 
+        private Expr assignment()
+        {
+            Expr expr = or();
+
+            if (match(EQUAL))
+            {
+                Token equals = previous();
+                Expr value = assignment();
+
+                if (expr is Expr.Variable)
+                {
+                    Token name = ((Expr.Variable)expr).name;
+                    return new Expr.Assign(name, value);
+                }
+
+                error(equals, "Invalid assignment target.");
+            }
+
+            return expr;
+        }
+
+        private Expr or()
+        {
+            Expr expr = and();
+
+            while (match(OR))
+            {
+                Token op = previous();
+                Expr right = and();
+                expr = new Expr.Logical(expr, op, right);
+            }
+
+            return expr;
+        }
+
+        private Expr and()
+        {
+            Expr expr = equality();
+
+            while (match(AND))
+            {
+                Token op = previous();
+                Expr right = equality();
+                expr = new Expr.Logical(expr, op, right);
+            }
+
+            return expr;
+        }
+
         private Expr equality()
         {
             Expr expr = comparison();
@@ -119,25 +186,6 @@ namespace LoxLang
             return expr;
         }
 
-        private Expr assignment()
-        {
-            Expr expr = equality();
-
-            if (match(EQUAL))
-            {
-                Token equals = previous();
-                Expr value = assignment();
-
-                if (expr is Expr.Variable) {
-                    Token name = ((Expr.Variable)expr).name;
-                    return new Expr.Assign(name, value);
-                }
-
-                error(equals, "Invalid assignment target.");
-            }
-
-            return expr;
-        }
 
         private Expr comparison()
         {
@@ -232,11 +280,15 @@ namespace LoxLang
 
         private Token consume(TokenType token, string message)
         {
-            return check(token) ? advance() : throw error(peek(), message);
+            if (check(token))
+                return advance();
+
+            throw error(peek(), message);
         }
 
         private Token previous()
         {
+            var test = _tokens[current - 1];
             return _tokens[current - 1];
         }
 
@@ -302,20 +354,23 @@ namespace LoxLang
 
         private bool isAtEnd()
         {
+            var test = peek().Type;
             return peek().Type == TokenType.EOF;
         }
 
         private Token peek()
         {
+            var test = _tokens[current];
             return _tokens[current];
         }
 
         private bool check(TokenType item)
         {
-            if (isAtEnd()) 
+            if (isAtEnd())
                 return false;
 
-            return  peek().Type == item;
+            var test = peek().Type;
+            return peek().Type == item;
         }
 
 

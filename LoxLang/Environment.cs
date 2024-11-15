@@ -15,7 +15,7 @@ namespace LoxLang
 
         public Environment()
         {
-                
+            _enclosing = null;
         }
 
         public void define(string name, object value)

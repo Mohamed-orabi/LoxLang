@@ -106,7 +106,7 @@ namespace LoxLang
                     stringToken();
                     break;
                 case 'o':
-                    if (peek() == 'r')
+                    if (match('r'))
                     {
                         addToken(TokenType.OR);
                     }

@@ -3,16 +3,16 @@ using static LoxLang.TokenType;
 
 namespace LoxLang
 {
-    public class Interpreter : Expr.IVisitor<object>, 
+    public class Interpreter : Expr.IVisitor<object>,
                                Stmt.IVisitor<object>
     {
-        private Environment environment = new Environment();
+        private Environment _environment = new Environment();
 
         public void interpret(List<Stmt> statements)
         {
             try
             {
-                foreach (Stmt stmt in statements) 
+                foreach (Stmt stmt in statements)
                 {
                     executeStmt(stmt);
                 }
@@ -74,7 +74,7 @@ namespace LoxLang
             return null;
         }
 
-        private bool isEqual(Object a, Object b)
+        private bool isEqual(object a, object b)
         {
             if (a == null && b == null) return true;
             if (a == null) return false;
@@ -82,7 +82,7 @@ namespace LoxLang
             return a.Equals(b);
         }
 
-        
+
 
         public object VisitGroupingExpr(Expr.Grouping expr)
         {
@@ -152,7 +152,7 @@ namespace LoxLang
             return null;
         }
 
-    
+
 
         public object VisitPrintStmt(Stmt.Print stmt)
         {
@@ -169,86 +169,99 @@ namespace LoxLang
                 value = executeExpr(stmt.initializer);
             }
 
-            environment.define(stmt.name.Lexeme, value);
+            _environment.define(stmt.name.Lexeme, value);
             return null;
         }
 
         public object VisitVariableExpr(Expr.Variable expr)
         {
-            return environment.get(expr.name);
+            return _environment.get(expr.name);
         }
 
         public object VisitAssignExpr(Expr.Assign expr)
         {
             object value = executeExpr(expr.value);
-            environment.assign(expr.name, value);
+            _environment.assign(expr.name, value);
             return value;
         }
 
         public object VisitBlockStmt(Stmt.Block stmt)
         {
-            executeBlock(stmt.statements, new Environment(environment));
+            executeBlock(stmt.statements, new Environment(_environment));
             return null;
         }
 
         void executeBlock(List<Stmt> statements,
                     Environment environment)
         {
-            Environment previous = this.environment;
+            Environment previous = _environment;
             try
             {
-                this.environment = environment;
+                _environment = environment;
 
-                foreach (Stmt stmt in statements) 
+                foreach (Stmt stmt in statements)
                 {
                     executeStmt(stmt);
                 }
-               
+
             }
             finally
             {
-                this.environment = previous;
+                _environment = previous;
             }
+        }
+        public object VisitIfStmt(Stmt.If stmt)
+        {
+            if (isTruthy(executeExpr(stmt.condition)))
+                executeStmt(stmt.thenBranch);
+            else if (stmt.elseBranch != null)
+                executeStmt(stmt.elseBranch);
+
+            return null;
+
+        }
+
+        public object VisitLogicalExpr(Expr.Logical expr)
+        {
+            object left = executeExpr(expr.left);
+
+            if (expr.op.Type == OR)
+            {
+                if (isTruthy(left))
+                    return left;
+            }
+            else
+            {
+                if (!isTruthy(left))
+                    return left;
+            }
+
+            return executeExpr(expr.right);
         }
 
         #region NotUsedYet
-        public object VisitIfStmt(Stmt.If stmt)
-        {
-            throw new NotImplementedException();
-        }
+
 
         public object VisitCallExpr(Expr.Call expr)
         {
             throw new NotImplementedException();
         }
-
         public object VisitGetExpr(Expr.Get expr)
         {
             throw new NotImplementedException();
         }
-        public object VisitLogicalExpr(Expr.Logical expr)
-        {
-            throw new NotImplementedException();
-        }
-
         public object VisitSetExpr(Expr.Set expr)
         {
             throw new NotImplementedException();
         }
-
         public object VisitSuperExpr(Expr.Super expr)
         {
             throw new NotImplementedException();
         }
-
         public object VisitThisExpr(Expr.This expr)
         {
             throw new NotImplementedException();
         }
-
-
-
-
         public object VisitClassStmt(Stmt.Class stmt)
         {
             throw new NotImplementedException();
@@ -261,9 +274,6 @@ namespace LoxLang
         {
             throw new NotImplementedException();
         }
-
-
-
         public object VisitWhileStmt(Stmt.While stmt)
         {
             throw new NotImplementedException();
