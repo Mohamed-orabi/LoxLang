@@ -239,6 +239,14 @@ namespace LoxLang
             return executeExpr(expr.right);
         }
 
+        public object VisitWhileStmt(Stmt.While stmt)
+        {
+            while (isTruthy(executeExpr(stmt.condition)))
+                executeStmt(stmt.body);
+
+            return null;
+        }
+
         #region NotUsedYet
 
 
@@ -274,10 +282,7 @@ namespace LoxLang
         {
             throw new NotImplementedException();
         }
-        public object VisitWhileStmt(Stmt.While stmt)
-        {
-            throw new NotImplementedException();
-        }
+
         #endregion
     }
 }
