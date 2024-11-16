@@ -1,12 +1,9 @@
-﻿
-using System.Text;
-
-namespace LoxLang
+﻿namespace LoxLang
 {
     public class Environment
     {
-        private Environment _enclosing;
-        private static Dictionary<string, object> values = new Dictionary<string, object>();
+        public Environment _enclosing;
+        public static Dictionary<string, object> values = new Dictionary<string, object>();
 
         public Environment(Environment enclosing)
         {
@@ -28,7 +25,8 @@ namespace LoxLang
             if (values.ContainsKey(name.Lexeme))
                 return values[name.Lexeme];
 
-            if (_enclosing != null) return _enclosing.get(name);
+            if (_enclosing != null) 
+                return _enclosing.get(name);
 
             throw new RuntimeError(name, "Undefined variable '" + name.Lexeme + "'.");
         }
@@ -38,11 +36,14 @@ namespace LoxLang
             if (values.ContainsKey(name.Lexeme))
             {
                 values[name.Lexeme] = value;
+                return;
             }
+
 
             if (_enclosing != null)
             {
                 _enclosing.assign(name, value);
+                return;
             }
 
             throw new RuntimeError(name, "Undefined variable '" + name.Lexeme + "'.");

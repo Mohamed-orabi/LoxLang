@@ -6,7 +6,7 @@ namespace LoxLang
     public class Interpreter : Expr.IVisitor<object>,
                                Stmt.IVisitor<object>
     {
-        private Environment _environment = new Environment();
+        public Environment _environment = new Environment();
 
         public void interpret(List<Stmt> statements)
         {
