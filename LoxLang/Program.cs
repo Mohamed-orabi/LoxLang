@@ -20,9 +20,7 @@ namespace LoxLang
             run(Encoding.UTF8.GetString(bytes));
 
             if (hadError)
-            {
                 System.Environment.Exit(65);
-            }
 
             if (hadRuntimeError)
                 System.Environment.Exit(65);

@@ -1,4 +1,4 @@
-﻿
+﻿using static LoxLang.TokenType;
 namespace LoxLang
 {
     public class Scanner
@@ -11,22 +11,22 @@ namespace LoxLang
         {
             _keywords = new Dictionary<string, TokenType>
             {
-                { "and", TokenType.AND },
-                { "class", TokenType.CLASS },
-                { "else", TokenType.ELSE },
-                { "false", TokenType.FALSE },
-                { "for", TokenType.FOR },
-                { "fun", TokenType.FUN },
-                { "if", TokenType.IF },
-                { "nil", TokenType.NIL },
-                { "or", TokenType.OR },
-                { "print", TokenType.PRINT },
-                { "return", TokenType.RETURN },
-                { "super", TokenType.SUPER },
-                { "this", TokenType.THIS },
-                { "true", TokenType.TRUE },
-                { "var", TokenType.VAR },
-                { "while", TokenType.WHILE }
+                { "and", AND },
+                { "class", CLASS },
+                { "else", ELSE },
+                { "false", FALSE },
+                { "for", FOR },
+                { "fun", FUN },
+                { "if", IF },
+                { "nil", NIL },
+                { "or", OR },
+                { "print", PRINT },
+                { "return", RETURN },
+                { "super", SUPER },
+                { "this", THIS },
+                { "true", TRUE },
+                { "var", VAR },
+                { "while",WHILE }
             };
         }
 
@@ -52,7 +52,7 @@ namespace LoxLang
                 scanToken();
             }
 
-            _tokens.Add(new Token(TokenType.EOF, "", null, _line));
+            _tokens.Add(new Token(EOF, "", null, _line));
             return _tokens;
         }
 
@@ -61,27 +61,27 @@ namespace LoxLang
             char c = advance();
             switch (c)
             {
-                case '(': addToken(TokenType.LEFT_PAREN); break;
-                case ')': addToken(TokenType.RIGHT_PAREN); break;
-                case '{': addToken(TokenType.LEFT_BRACE); break;
-                case '}': addToken(TokenType.RIGHT_BRACE); break;
-                case ',': addToken(TokenType.COMMA); break;
-                case '.': addToken(TokenType.DOT); break;
-                case '-': addToken(TokenType.MINUS); break;
-                case '+': addToken(TokenType.PLUS); break;
-                case ';': addToken(TokenType.SEMICOLON); break;
-                case '*': addToken(TokenType.STAR); break;
+                case '(': addToken(LEFT_PAREN); break;
+                case ')': addToken(RIGHT_PAREN); break;
+                case '{': addToken(LEFT_BRACE); break;
+                case '}': addToken(RIGHT_BRACE); break;
+                case ',': addToken(COMMA); break;
+                case '.': addToken(DOT); break;
+                case '-': addToken(MINUS); break;
+                case '+': addToken(PLUS); break;
+                case ';': addToken(SEMICOLON); break;
+                case '*': addToken(STAR); break;
                 case '!':
-                    addToken(match('=') ? TokenType.BANG_EQUAL : TokenType.BANG);
+                    addToken(match('=') ? BANG_EQUAL : BANG);
                     break;
                 case '=':
-                    addToken(match('=') ? TokenType.EQUAL_EQUAL : TokenType.EQUAL);
+                    addToken(match('=') ? EQUAL_EQUAL : EQUAL);
                     break;
                 case '<':
-                    addToken(match('=') ? TokenType.LESS_EQUAL : TokenType.LESS);
+                    addToken(match('=') ? LESS_EQUAL : LESS);
                     break;
                 case '>':
-                    addToken(match('=') ? TokenType.GREATER_EQUAL : TokenType.GREATER);
+                    addToken(match('=') ? GREATER_EQUAL : GREATER);
                     break;
                 case '/':
                     if (match('/'))
@@ -91,7 +91,7 @@ namespace LoxLang
                     }
                     else
                     {
-                        addToken(TokenType.SLASH);
+                        addToken(SLASH);
                     }
                     break;
                 case ' ':
@@ -108,7 +108,7 @@ namespace LoxLang
                 case 'o':
                     if (match('r'))
                     {
-                        addToken(TokenType.OR);
+                        addToken(OR);
                     }
                     break;
                 default:
@@ -136,7 +136,7 @@ namespace LoxLang
             string text = _source.Substring(_start,(_current-_start));
 
             if(!_keywords.ContainsKey(text))
-                addToken(TokenType.IDENTIFIER);
+                addToken(IDENTIFIER);
             else
             {
                 type = _keywords[text];
@@ -161,7 +161,7 @@ namespace LoxLang
                 advance();
                 while (isDigit(peek())) advance();
             }
-            addToken(TokenType.NUMBER, double.Parse(_source.Substring(_start, (_current - _start))));
+            addToken(NUMBER, double.Parse(_source.Substring(_start, (_current - _start))));
 
         }
 
@@ -197,7 +197,7 @@ namespace LoxLang
             int end = _current - 1;
             // Trim the surrounding quotes.
             string value = _source.Substring(_start + 1, (end - start));
-            addToken(TokenType.STRING, value);
+            addToken(STRING, value);
         }
 
         private char peek()

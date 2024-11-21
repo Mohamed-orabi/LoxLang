@@ -1,4 +1,5 @@
 ﻿using System;
+using static LoxLang.Expr;
 using static LoxLang.TokenType;
 
 namespace LoxLang
@@ -6,8 +7,13 @@ namespace LoxLang
     public class Interpreter : Expr.IVisitor<object>,
                                Stmt.IVisitor<object>
     {
-        public Environment _environment = new Environment();
+        public Environment globals = new Environment();
+        public Environment _environment ;
 
+        public Interpreter() // Constructor
+        {
+            _environment = globals;
+        }
         public void interpret(List<Stmt> statements)
         {
             try
@@ -191,7 +197,7 @@ namespace LoxLang
             return null;
         }
 
-        void executeBlock(List<Stmt> statements,
+        public void executeBlock(List<Stmt> statements,
                     Environment environment)
         {
             Environment previous = _environment;
@@ -247,13 +253,51 @@ namespace LoxLang
             return null;
         }
 
-        #region NotUsedYet
-
-
         public object VisitCallExpr(Expr.Call expr)
         {
-            throw new NotImplementedException();
+            object callee = executeExpr(expr.callee);
+
+            List<object> arguments = new List<object>();
+
+            foreach (Expr item in expr.arguments)
+            {
+                arguments.Add(executeExpr(item));
+            }
+
+            if (!(callee is LoxCallable))
+                throw new RuntimeError(expr.paren, "Can only call functions and classes.");
+
+            LoxCallable function = (LoxCallable)callee;
+
+            if (arguments.Count != function.arity())
+            {
+                throw new RuntimeError(expr.paren, "Expected " +
+                    function.arity() + " arguments but got " +
+                    arguments.Count + ".");
+            }
+
+            return function.call(this,arguments);
         }
+
+        public object VisitFunctionStmt(Stmt.Function stmt)
+        {
+            LoxFunction function = new LoxFunction(stmt);
+            _environment.define(stmt.name.Lexeme, function);
+            return null;
+        }
+
+        public object VisitReturnStmt(Stmt.Return stmt)
+        {
+            object value = null;
+
+            if(stmt.value != null)
+                value = executeExpr(stmt.value);
+
+            throw new Return(value);
+        }
+
+        #region NotUsedYet
+
         public object VisitGetExpr(Expr.Get expr)
         {
             throw new NotImplementedException();
@@ -274,14 +318,8 @@ namespace LoxLang
         {
             throw new NotImplementedException();
         }
-        public object VisitFunctionStmt(Stmt.Function stmt)
-        {
-            throw new NotImplementedException();
-        }
-        public object VisitReturnStmt(Stmt.Return stmt)
-        {
-            throw new NotImplementedException();
-        }
+
+
 
         #endregion
     }

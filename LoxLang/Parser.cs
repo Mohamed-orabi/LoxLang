@@ -27,6 +27,7 @@ namespace LoxLang
         {
             try
             {
+                if (match(FUN)) return function("function");
                 if (match(VAR)) return varDeclaration();
 
                 return statement();
@@ -36,6 +37,27 @@ namespace LoxLang
                 synchronize();
                 return null;
             }
+        }
+        private Stmt.Function function(string kind)
+        {
+            Token name = consume(IDENTIFIER, "Expect " + kind + " name.");
+            consume(LEFT_PAREN, "Expect '(' after " + kind + " name.");
+            List<Token> parameters = new List<Token>();
+            if (!check(RIGHT_PAREN))
+            {
+                do
+                {
+                    if (parameters.Count > 250)
+                    {
+                        error(peek(), "Can't have more than 255 parameters.");
+                    }
+                    parameters.Add(consume(IDENTIFIER, "Expect parameter name."));
+                } while (match(COMMA));
+            }
+            consume(RIGHT_PAREN, "Expect ')' after parameters.");
+            consume(LEFT_BRACE, "Expect '{' before " + kind + " body.");
+            List<Stmt> body = block();
+            return new Stmt.Function(name, parameters, body);
         }
 
         private Stmt varDeclaration()
@@ -72,6 +94,9 @@ namespace LoxLang
             if (match(PRINT))
                 return printStatement();
 
+            if (match(RETURN)) 
+                return returnStatement();
+
             if (match(WHILE))
                 return whileStatement();
 
@@ -80,6 +105,18 @@ namespace LoxLang
             return expressionStatement();
         }
 
+        private Stmt returnStatement()
+        {
+            Token keyword = previous();
+            Expr value = null;
+            if (!check(SEMICOLON))
+            {
+                value = expression();
+            }
+
+            consume(SEMICOLON, "Expect ';' after return value.");
+            return new Stmt.Return(keyword, value);
+        }
         private Stmt forStatement()
         {
             consume(LEFT_PAREN, "Expect '(' after 'for'.");
@@ -181,17 +218,6 @@ namespace LoxLang
             return new Stmt.Expression(expr);
         }
 
-        public Expr Oldparse()
-        {
-            try
-            {
-                return expression();
-            }
-            catch (ParseError)
-            {
-                return null;
-            }
-        }
 
         private Expr expression()
         {
@@ -251,7 +277,7 @@ namespace LoxLang
         {
             Expr expr = comparison();
 
-            while (match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL))
+            while (match(BANG_EQUAL, EQUAL_EQUAL))
             {
                 Token op = previous();
                 Expr right = comparison();
@@ -266,7 +292,7 @@ namespace LoxLang
         {
             Expr expr = term();
 
-            while (match(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL))
+            while (match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL))
             {
                 Token op = previous();
                 Expr right = term();
@@ -280,7 +306,7 @@ namespace LoxLang
         {
             Expr expr = factor();
 
-            while (match(TokenType.MINUS, TokenType.PLUS))
+            while (match(MINUS, PLUS))
             {
                 Token op = previous();
                 Expr right = factor();
@@ -294,7 +320,7 @@ namespace LoxLang
         {
             Expr expr = unary();
 
-            while (match(TokenType.SLASH, TokenType.STAR))
+            while (match(SLASH, STAR))
             {
                 Token op = previous();
                 Expr right = unary();
@@ -306,34 +332,74 @@ namespace LoxLang
 
         private Expr unary()
         {
-            if (match(TokenType.BANG, TokenType.MINUS))
+            if (match(BANG, MINUS))
             {
                 Token op = previous();
                 Expr right = unary();
                 return new Expr.Unary(op, right);
             }
 
-            return primary();
+            return call();
+        }
+
+        private Expr finishCall(Expr callee)
+        {
+            List<Expr> arguments = new List<Expr>();
+            if (!check(RIGHT_PAREN))
+            {
+                do
+                {
+                    if (arguments.Count >= 255)
+                    {
+                        error(peek(), "Can't have more than 255 arguments.");
+                    }
+                    arguments.Add(expression());
+                } while (match(COMMA));
+            }
+
+            Token paren = consume(RIGHT_PAREN,
+                                  "Expect ')' after arguments.");
+
+            return new Expr.Call(callee, paren, arguments);
+        }
+
+        private Expr call()
+        {
+            Expr expr = primary();
+
+            while (true)
+            {
+                if (match(LEFT_PAREN))
+                {
+                    expr = finishCall(expr);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return expr;
         }
 
         private Expr primary()
         {
-            if (match(TokenType.FALSE))
+            if (match(FALSE))
             {
                 return new Expr.Literal(false);
             }
 
-            if (match(TokenType.TRUE))
+            if (match(TRUE))
             {
                 return new Expr.Literal(true);
             }
 
-            if (match(TokenType.NIL))
+            if (match(NIL))
             {
                 return new Expr.Literal(null);
             }
 
-            if (match(TokenType.NUMBER, TokenType.STRING))
+            if (match(NUMBER, STRING))
             {
                 return new Expr.Literal(previous().Literal);
             }
@@ -343,10 +409,10 @@ namespace LoxLang
                 return new Expr.Variable(previous());
             }
 
-            if (match(TokenType.LEFT_PAREN))
+            if (match(LEFT_PAREN))
             {
                 Expr expr = expression();
-                _ = consume(RIGHT_PAREN, "Expect ')' after expression.");
+                consume(RIGHT_PAREN, "Expect ')' after expression.");
                 return new Expr.Grouping(expr);
             }
 
@@ -447,10 +513,5 @@ namespace LoxLang
             var test = peek().Type;
             return peek().Type == item;
         }
-
-
-
-
-
     }
 }

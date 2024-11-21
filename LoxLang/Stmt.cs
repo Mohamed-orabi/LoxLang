@@ -47,7 +47,7 @@ namespace LoxLang
 
             public readonly Token name;
             public readonly Expr.Variable superclass;
-            public readonly List<Stmt.Function> methods;
+            public readonly List<Function> methods;
         }
         public class Expression : Stmt
         {
