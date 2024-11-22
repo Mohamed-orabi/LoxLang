@@ -1,4 +1,4 @@
-# LoxLang
+# Lox Programming Language
 
 # Features
 Lox is a simple yet powerful programming language that supports:
