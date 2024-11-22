@@ -281,7 +281,7 @@ namespace LoxLang
 
         public object VisitFunctionStmt(Stmt.Function stmt)
         {
-            LoxFunction function = new LoxFunction(stmt);
+            LoxFunction function = new LoxFunction(stmt,_environment);
             _environment.define(stmt.name.Lexeme, function);
             return null;
         }
