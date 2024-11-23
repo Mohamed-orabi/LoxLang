@@ -31,7 +31,7 @@ namespace LoxLang
             Scanner scanner = new(source);
             List<Token> tokens = scanner.scanTokens();
             Parser parser = new Parser(tokens);
-            var expr = parser.parse();
+            List<Stmt> expr = parser.parse();
             Interpreter interpreter = new Interpreter();
             interpreter.interpret(expr);
         }
@@ -49,13 +49,9 @@ namespace LoxLang
         public static void error(Token token, String message)
         {
             if (token.Type == TokenType.EOF)
-            {
                 report(token.Line, " at end", message);
-            }
             else
-            {
                 report(token.Line, " at '" + token.Lexeme + "'", message);
-            }
         }
 
         public static void runtimeError(RuntimeError error)

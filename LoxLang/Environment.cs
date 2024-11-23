@@ -31,7 +31,7 @@
             throw new RuntimeError(name, "Undefined variable '" + name.Lexeme + "'.");
         }
 
-        public void assign(Token name, Object value)
+        public void assign(Token name, object value)
         {
             if (values.ContainsKey(name.Lexeme))
             {

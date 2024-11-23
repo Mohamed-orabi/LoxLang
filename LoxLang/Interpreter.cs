@@ -8,7 +8,7 @@ namespace LoxLang
                                Stmt.IVisitor<object>
     {
         public Environment globals = new Environment();
-        public Environment _environment ;
+        public Environment _environment;
 
         public Interpreter() // Constructor
         {

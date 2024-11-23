@@ -4,8 +4,45 @@ using static LoxLang.TokenType;
 
 namespace LoxLang
 {
-    public class Resolver : Expr.IVisitor<object>, Stmt.IVisitor<object>
+    public class Resolver : Expr.IVisitor<object>, 
+                            Stmt.IVisitor<object>
     {
+        private readonly Interpreter _interpreter;
+        private readonly Stack<Dictionary<string,bool>> scopes = new Stack<Dictionary<string,bool>>();
+
+        public Resolver(Interpreter interpreter)
+        {
+            _interpreter = interpreter;
+        }
+
+        void resolve(List<Stmt> statements)
+        {
+            foreach (Stmt item in statements)
+            {
+                resolve(item);
+            }
+        }
+
+        private void beginScope()
+        {
+            scopes.Push(new Dictionary<string, bool>());
+        }
+
+        private void endScope()
+        {
+            scopes.Pop();
+        }
+
+        private void resolve(Stmt stmt)
+        {
+            stmt.Accept(this);
+        }
+
+        private void resolve(Expr expr)
+        {
+            expr.Accept(this);
+        }
+
         public object VisitAssignExpr(Assign expr)
         {
             throw new NotImplementedException();
@@ -18,7 +55,10 @@ namespace LoxLang
 
         public object VisitBlockStmt(Block stmt)
         {
-            throw new NotImplementedException();
+            beginScope();
+            resolve(stmt.statements);
+            endScope();
+            return null;
         }
 
         public object VisitCallExpr(Call expr)
