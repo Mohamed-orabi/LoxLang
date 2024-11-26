@@ -15,7 +15,7 @@ namespace LoxLang
             _interpreter = interpreter;
         }
 
-        void resolve(List<Stmt> statements)
+        public void resolve(List<Stmt> statements)
         {
             foreach (Stmt item in statements)
             {
@@ -32,6 +32,24 @@ namespace LoxLang
         {
             scopes.Pop();
         }
+        private void declare(Token name)
+        {
+            if (scopes.Count == 0) 
+                return;
+
+            var scope = scopes.Peek();
+            scope[name.Lexeme] =  false;
+        }
+
+        private void define(Token name)
+        {
+            if (scopes.Count == 0)
+                return;
+
+            var scope = scopes.Peek();
+            scope[name.Lexeme] = true;
+        }
+
 
         private void resolve(Stmt stmt)
         {
@@ -45,12 +63,16 @@ namespace LoxLang
 
         public object VisitAssignExpr(Assign expr)
         {
-            throw new NotImplementedException();
+            resolve(expr.value);
+            resolveLocal(expr, expr.name);
+            return null;
         }
 
         public object VisitBinaryExpr(Binary expr)
         {
-            throw new NotImplementedException();
+            resolve(expr.left);
+            resolve(expr.right);
+            return null;
         }
 
         public object VisitBlockStmt(Block stmt)
@@ -63,7 +85,13 @@ namespace LoxLang
 
         public object VisitCallExpr(Call expr)
         {
-            throw new NotImplementedException();
+            resolve(expr.callee);
+            foreach (var item in expr.arguments)
+            {
+                resolve(item);
+            }
+
+            return null;
         }
 
         public object VisitClassStmt(Class stmt)
@@ -73,12 +101,31 @@ namespace LoxLang
 
         public object VisitExpressionStmt(Expression stmt)
         {
-            throw new NotImplementedException();
+            resolve(stmt.expression);
+            return null;
         }
 
         public object VisitFunctionStmt(Function stmt)
         {
-            throw new NotImplementedException();
+            declare(stmt.name);
+            define(stmt.name);
+
+            resolveFunction(stmt);
+            return null;
+        }
+
+        private void resolveFunction(Stmt.Function function)
+        {
+            beginScope();
+
+            foreach (Token item in function.param)
+            {
+                declare(item);
+                define(item);
+            }
+
+            resolve(function.body);
+            endScope();
         }
 
         public object VisitGetExpr(Get expr)
@@ -88,32 +135,45 @@ namespace LoxLang
 
         public object VisitGroupingExpr(Grouping expr)
         {
-            throw new NotImplementedException();
+            resolve(expr.expression);
+            return null;
         }
 
         public object VisitIfStmt(If stmt)
         {
-            throw new NotImplementedException();
+            resolve(stmt.condition);
+            resolve(stmt.thenBranch);
+            if (stmt.elseBranch != null) 
+                resolve(stmt.elseBranch);
+            return null;
         }
 
         public object VisitLiteralExpr(Literal expr)
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public object VisitLogicalExpr(Logical expr)
         {
-            throw new NotImplementedException();
+            resolve(expr.left);
+            resolve(expr.right);
+            return null;
         }
 
         public object VisitPrintStmt(Print stmt)
         {
-            throw new NotImplementedException();
+            resolve(stmt.expression);
+            return null;
         }
 
         public object VisitReturnStmt(Stmt.Return stmt)
         {
-            throw new NotImplementedException();
+            if (stmt.value != null)
+            {
+                resolve(stmt.value);
+            }
+
+            return null;
         }
 
         public object VisitSetExpr(Set expr)
@@ -133,22 +193,49 @@ namespace LoxLang
 
         public object VisitUnaryExpr(Unary expr)
         {
-            throw new NotImplementedException();
+            resolve(expr.right);
+            return null;
         }
 
         public object VisitVariableExpr(Variable expr)
         {
-            throw new NotImplementedException();
+            if (!(scopes.Count == 0) && scopes.Peek()[expr.name.Lexeme] == false)
+            {
+                Program.error(expr.name,
+                    "Can't read local variable in its own initializer.");
+            }
+
+            resolveLocal(expr, expr.name);
+            return null;
         }
 
+        private void resolveLocal(Expr expr, Token name)
+        {
+            for (int i = scopes.Count - 1; i >= 0; i--)
+            {
+                if (scopes.ElementAt(i).ContainsKey(name.Lexeme))
+                {
+                    _interpreter.resolve(expr, scopes.Count - 1 - i);
+                    return;
+                }
+            }
+        }
         public object VisitVarStmt(Var stmt)
         {
-            throw new NotImplementedException();
+            declare(stmt.name);
+            if (stmt.initializer != null)
+            {
+                resolve(stmt.initializer);
+            }
+            define(stmt.name);
+            return null;
         }
 
         public object VisitWhileStmt(While stmt)
         {
-            throw new NotImplementedException();
+            resolve(stmt.condition);
+            resolve(stmt.body);
+            return null;
         }
     }
 }

@@ -9,6 +9,7 @@ namespace LoxLang
     {
         public Environment globals = new Environment();
         public Environment _environment;
+        private Dictionary<Expr,int> local = new Dictionary<Expr,int>();
 
         public Interpreter() // Constructor
         {
@@ -34,6 +35,10 @@ namespace LoxLang
             stmt.Accept(this);
         }
 
+        public void resolve(Expr expr, int depth)
+        {
+            local[expr] = depth;
+        }
         public object VisitBinaryExpr(Expr.Binary expr)
         {
             var right = executeExpr(expr.right);

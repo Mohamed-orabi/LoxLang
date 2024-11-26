@@ -7,6 +7,7 @@ namespace LoxLang
     {
         private static bool hadError = false;
         static bool hadRuntimeError = false;
+        private static  Interpreter _interpreter = new Interpreter();
         private static void Main(string[] args)
         {
             string Path = @"D:\Code.txt";
@@ -32,8 +33,11 @@ namespace LoxLang
             List<Token> tokens = scanner.scanTokens();
             Parser parser = new Parser(tokens);
             List<Stmt> expr = parser.parse();
-            Interpreter interpreter = new Interpreter();
-            interpreter.interpret(expr);
+
+            Resolver resolver = new Resolver(_interpreter);
+            resolver.resolve(expr);
+ 
+            _interpreter.interpret(expr);
         }
 
         public static void error(int line, string message)
