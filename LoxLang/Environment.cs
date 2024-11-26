@@ -3,7 +3,7 @@
     public class Environment
     {
         public Environment _enclosing;
-        public static Dictionary<string, object> values = new Dictionary<string, object>();
+        public Dictionary<string, object> values = new Dictionary<string, object>();
 
         public Environment(Environment enclosing)
         {
@@ -47,6 +47,27 @@
             }
 
             throw new RuntimeError(name, "Undefined variable '" + name.Lexeme + "'.");
+        }
+
+        public object getAt(int distance, String name)
+        {
+            return ancestor(distance).values[name];
+        }
+
+
+        public void assignAt(int distance, Token name, Object value)
+        {
+            ancestor(distance).values[name.Lexeme] =  value;
+        }
+        Environment ancestor(int distance)
+        {
+            Environment environment = this;
+            for (int i = 0; i < distance; i++)
+            {
+                environment = environment._enclosing;
+            }
+
+            return environment;
         }
     }
 }

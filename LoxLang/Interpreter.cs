@@ -186,12 +186,36 @@ namespace LoxLang
 
         public object VisitVariableExpr(Expr.Variable expr)
         {
-            return _environment.get(expr.name);
+            return lookUpVariable(expr.name, expr);
+        }
+
+        private Object lookUpVariable(Token name, Expr expr)
+        {
+            int distance = local[expr];
+            if (distance != null)
+            {
+                return _environment.getAt(distance, name.Lexeme);
+            }
+            else
+            {
+                return globals.get(name);
+            }
         }
 
         public object VisitAssignExpr(Expr.Assign expr)
         {
             object value = executeExpr(expr.value);
+
+            int distance = local[expr];
+            if (distance != null)
+            {
+                _environment.assignAt(distance, expr.name, value);
+            }
+            else
+            {
+                globals.assign(expr.name, value);
+            }
+
             _environment.assign(expr.name, value);
             return value;
         }
