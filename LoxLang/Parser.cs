@@ -27,6 +27,7 @@ namespace LoxLang
         {
             try
             {
+                if (match(CLASS)) return classDeclaration();
                 if (match(FUN)) return function("function");
                 if (match(VAR)) return varDeclaration();
 
@@ -37,6 +38,22 @@ namespace LoxLang
                 synchronize();
                 return null;
             }
+        }
+
+        private Stmt classDeclaration()
+        {
+            Token name = consume(IDENTIFIER, "Expect class name.");
+            consume(LEFT_BRACE, "Expect '{' before class body.");
+
+            List<Stmt.Function> methods = new List<Stmt.Function> ();
+            while (!check(RIGHT_BRACE) && !isAtEnd())
+            {
+                methods.Add(function("method"));
+            }
+
+            consume(RIGHT_BRACE, "Expect '}' after class body.");
+
+            return new Stmt.Class(name,null, methods);
         }
         private Stmt.Function function(string kind)
         {

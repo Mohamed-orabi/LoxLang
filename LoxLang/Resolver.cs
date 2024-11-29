@@ -104,7 +104,9 @@ namespace LoxLang
 
         public object VisitClassStmt(Class stmt)
         {
-            throw new NotImplementedException();
+            declare(stmt.name);
+            define(stmt.name);
+            return null;
         }
 
         public object VisitExpressionStmt(Expression stmt)

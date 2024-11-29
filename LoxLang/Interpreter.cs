@@ -346,7 +346,10 @@ namespace LoxLang
         }
         public object VisitClassStmt(Stmt.Class stmt)
         {
-            throw new NotImplementedException();
+            _environment.define(stmt.name.Lexeme, null);
+            LoxClass klass = new LoxClass(stmt.name.Lexeme);
+            _environment.assign(stmt.name, klass);
+            return null;
         }
 
 
