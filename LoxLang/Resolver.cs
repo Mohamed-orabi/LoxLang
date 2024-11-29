@@ -9,6 +9,7 @@ namespace LoxLang
     {
         private readonly Interpreter _interpreter;
         private readonly Stack<Dictionary<string,bool>> scopes = new Stack<Dictionary<string,bool>>();
+        private FunctionType currentFunction = FunctionType.NONE;
 
         public Resolver(Interpreter interpreter)
         {
@@ -38,6 +39,13 @@ namespace LoxLang
                 return;
 
             var scope = scopes.Peek();
+
+            if (scope.ContainsKey(name.Lexeme))
+            {
+                Program.error(name,
+                    "Already a variable with this name in this scope.");
+            }
+
             scope[name.Lexeme] =  false;
         }
 
@@ -110,12 +118,15 @@ namespace LoxLang
             declare(stmt.name);
             define(stmt.name);
 
-            resolveFunction(stmt);
+            resolveFunction(stmt, FunctionType.FUNCTION);
             return null;
         }
 
-        private void resolveFunction(Stmt.Function function)
+        private void resolveFunction(Stmt.Function function,FunctionType type)
         {
+            FunctionType enclosingFunction = currentFunction;
+            currentFunction = type;
+
             beginScope();
 
             foreach (Token item in function.param)
@@ -126,6 +137,7 @@ namespace LoxLang
 
             resolve(function.body);
             endScope();
+            currentFunction = enclosingFunction;
         }
 
         public object VisitGetExpr(Get expr)
@@ -168,6 +180,12 @@ namespace LoxLang
 
         public object VisitReturnStmt(Stmt.Return stmt)
         {
+
+            if (currentFunction == FunctionType.NONE)
+            {
+                Program.error(stmt.keyword, "Can't return from top-level code.");
+            }
+
             if (stmt.value != null)
             {
                 resolve(stmt.value);
