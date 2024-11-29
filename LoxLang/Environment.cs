@@ -49,15 +49,24 @@
             throw new RuntimeError(name, "Undefined variable '" + name.Lexeme + "'.");
         }
 
-        public object getAt(int distance, String name)
+        public object getAt(int distance, string name)
         {
-            return ancestor(distance).values[name];
+            if (ancestor(distance).values.ContainsKey(name))
+            {
+                return ancestor(distance).values[name];
+            }
+            
+            return null;
         }
 
 
-        public void assignAt(int distance, Token name, Object value)
+        public void assignAt(int distance, Token name, object value)
         {
-            ancestor(distance).values[name.Lexeme] =  value;
+            if (ancestor(distance).values.ContainsKey(name.Lexeme))
+            {
+                ancestor(distance).values[name.Lexeme] = value;
+            }
+  
         }
         Environment ancestor(int distance)
         {
