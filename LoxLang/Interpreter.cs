@@ -326,24 +326,31 @@ namespace LoxLang
             throw new Return(value);
         }
 
-        #region NotUsedYet
-
         public object VisitGetExpr(Expr.Get expr)
         {
-            throw new NotImplementedException();
+            object obj = executeExpr(expr.obj);
+            if (obj is LoxInstance) {
+                return ((LoxInstance)obj).get(expr.name);
+            }
+
+            throw new RuntimeError(expr.name,
+                "Only instances have properties.");
         }
+
         public object VisitSetExpr(Expr.Set expr)
         {
-            throw new NotImplementedException();
+            object obj = executeExpr(expr.obj);
+
+            if (!(obj is LoxInstance)) {
+                throw new RuntimeError(expr.name,
+                                       "Only instances have fields.");
+            }
+
+            object value = executeExpr(expr.value);
+            ((LoxInstance)obj).set(expr.name, value);
+            return value;
         }
-        public object VisitSuperExpr(Expr.Super expr)
-        {
-            throw new NotImplementedException();
-        }
-        public object VisitThisExpr(Expr.This expr)
-        {
-            throw new NotImplementedException();
-        }
+
         public object VisitClassStmt(Stmt.Class stmt)
         {
             _environment.define(stmt.name.Lexeme, null);
@@ -352,8 +359,15 @@ namespace LoxLang
             return null;
         }
 
-
-
+        #region NotUsedYet
+        public object VisitSuperExpr(Expr.Super expr)
+        {
+            throw new NotImplementedException();
+        }
+        public object VisitThisExpr(Expr.This expr)
+        {
+            throw new NotImplementedException();
+        }
         #endregion
     }
 }

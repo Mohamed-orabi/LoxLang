@@ -144,7 +144,8 @@ namespace LoxLang
 
         public object VisitGetExpr(Get expr)
         {
-            throw new NotImplementedException();
+            resolve(expr.obj);
+            return null;
         }
 
         public object VisitGroupingExpr(Grouping expr)
@@ -198,7 +199,9 @@ namespace LoxLang
 
         public object VisitSetExpr(Set expr)
         {
-            throw new NotImplementedException();
+            resolve(expr.value);
+            resolve(expr.obj);
+            return null;
         }
 
         public object VisitSuperExpr(Super expr)

@@ -33,10 +33,8 @@ namespace LoxLang
             List<Token> tokens = scanner.scanTokens();
             Parser parser = new Parser(tokens);
             List<Stmt> expr = parser.parse();
-
             Resolver resolver = new Resolver(_interpreter);
             resolver.resolve(expr);
- 
             _interpreter.interpret(expr);
         }
 

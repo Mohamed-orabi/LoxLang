@@ -1,4 +1,5 @@
 ﻿using System;
+using static LoxLang.Expr;
 using static LoxLang.TokenType;
 
 namespace LoxLang
@@ -255,6 +256,10 @@ namespace LoxLang
                     Token name = ((Expr.Variable)expr).name;
                     return new Expr.Assign(name, value);
                 }
+                else if (expr is Expr.Get) {
+                    Expr.Get get = (Expr.Get)expr;
+                    return new Expr.Set(get.obj, get.name, value);
+                }
 
                 error(equals, "Invalid assignment target.");
             }
@@ -389,6 +394,12 @@ namespace LoxLang
                 if (match(LEFT_PAREN))
                 {
                     expr = finishCall(expr);
+                }
+                else if (match(DOT))
+                {
+                    Token name = consume(IDENTIFIER,
+                        "Expect property name after '.'.");
+                    expr = new Expr.Get(expr, name);
                 }
                 else
                 {
