@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Xml.Linq;
 using static LoxLang.Expr;
 using static LoxLang.TokenType;
 
@@ -191,9 +192,9 @@ namespace LoxLang
 
         private Object lookUpVariable(Token name, Expr expr)
         {
-            int distance = local[expr];
-            if (distance != null)
+            if (local.ContainsKey(expr))
             {
+                int distance = local[expr];
                 return _environment.getAt(distance, name.Lexeme);
             }
             else
@@ -206,9 +207,9 @@ namespace LoxLang
         {
             object value = executeExpr(expr.value);
 
-            int distance = local[expr];
-            if (distance != null)
+            if (local.ContainsKey(expr))
             {
+                int distance = local[expr];
                 _environment.assignAt(distance, expr.name, value);
             }
             else

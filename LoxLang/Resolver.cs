@@ -217,7 +217,7 @@ namespace LoxLang
 
         public object VisitVariableExpr(Variable expr)
         {
-            if (!(scopes.Count == 0) && scopes.Peek()[expr.name.Lexeme] == false)
+            if (!(scopes.Count != 0) && scopes.Peek()[expr.name.Lexeme] == false)
             {
                 Program.error(expr.name,
                     "Can't read local variable in its own initializer.");
