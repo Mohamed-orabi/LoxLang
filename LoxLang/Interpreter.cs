@@ -354,7 +354,14 @@ namespace LoxLang
         public object VisitClassStmt(Stmt.Class stmt)
         {
             _environment.define(stmt.name.Lexeme, null);
-            LoxClass klass = new LoxClass(stmt.name.Lexeme);
+            
+            Dictionary<string,LoxFunction>  methods = new Dictionary<string,LoxFunction>();
+            foreach (var method in stmt.methods)
+            {
+                LoxFunction function = new LoxFunction(method, _environment);
+                methods[method.name.Lexeme]  = function;
+            }
+            LoxClass klass = new LoxClass(stmt.name.Lexeme, methods);
             _environment.assign(stmt.name, klass);
             return null;
         }

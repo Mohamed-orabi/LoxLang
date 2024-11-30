@@ -106,6 +106,12 @@ namespace LoxLang
         {
             declare(stmt.name);
             define(stmt.name);
+
+            foreach (Function item in stmt.methods)
+            {
+                FunctionType declaration = FunctionType.METHOD;
+                resolveFunction(item, declaration);
+            }
             return null;
         }
 
