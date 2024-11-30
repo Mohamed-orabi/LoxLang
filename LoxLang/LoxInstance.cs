@@ -20,7 +20,7 @@ namespace LoxLang
             }
 
             LoxFunction method = _klass.findMethod(name.Lexeme);
-            if (method != null) return method;
+            if (method != null) return method.bind(this);
 
             throw new RuntimeError(name,
                 "Undefined property '" + name.Lexeme + "'.");

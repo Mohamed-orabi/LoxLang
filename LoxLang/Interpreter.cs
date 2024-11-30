@@ -311,7 +311,7 @@ namespace LoxLang
 
         public object VisitFunctionStmt(Stmt.Function stmt)
         {
-            LoxFunction function = new LoxFunction(stmt,_environment);
+            LoxFunction function = new LoxFunction(stmt,_environment,false);
             _environment.define(stmt.name.Lexeme, function);
             return null;
         }
@@ -358,7 +358,7 @@ namespace LoxLang
             Dictionary<string,LoxFunction>  methods = new Dictionary<string,LoxFunction>();
             foreach (var method in stmt.methods)
             {
-                LoxFunction function = new LoxFunction(method, _environment);
+                LoxFunction function = new LoxFunction(method, _environment,method.name.Lexeme == "init");
                 methods[method.name.Lexeme]  = function;
             }
             LoxClass klass = new LoxClass(stmt.name.Lexeme, methods);
@@ -366,15 +366,17 @@ namespace LoxLang
             return null;
         }
 
+        public object VisitThisExpr(Expr.This expr)
+        {
+            return lookUpVariable(expr.keyword, expr);
+        }
+
         #region NotUsedYet
         public object VisitSuperExpr(Expr.Super expr)
         {
             throw new NotImplementedException();
         }
-        public object VisitThisExpr(Expr.This expr)
-        {
-            throw new NotImplementedException();
-        }
+
         #endregion
     }
 }

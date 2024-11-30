@@ -10,6 +10,7 @@ namespace LoxLang
         private readonly Interpreter _interpreter;
         private readonly Stack<Dictionary<string,bool>> scopes = new Stack<Dictionary<string,bool>>();
         private FunctionType currentFunction = FunctionType.NONE;
+        private ClassType currentClass = ClassType.NONE;
 
         public Resolver(Interpreter interpreter)
         {
@@ -104,14 +105,27 @@ namespace LoxLang
 
         public object VisitClassStmt(Class stmt)
         {
+
+            ClassType enclosingClass = currentClass;
+            currentClass = ClassType.CLASS;
+
             declare(stmt.name);
             define(stmt.name);
+
+            beginScope();
+            scopes.Peek()["this"] =  true;
 
             foreach (Function item in stmt.methods)
             {
                 FunctionType declaration = FunctionType.METHOD;
+                if (item.name.Lexeme == "init")
+                {
+                    declaration = FunctionType.INITIALIZER;
+                }
                 resolveFunction(item, declaration);
             }
+            endScope();
+            currentClass = enclosingClass;
             return null;
         }
 
@@ -197,6 +211,11 @@ namespace LoxLang
 
             if (stmt.value != null)
             {
+                if (currentFunction == FunctionType.INITIALIZER)
+                {
+                    Program.error(stmt.keyword,
+                        "Can't return a value from an initializer.");
+                }
                 resolve(stmt.value);
             }
 
@@ -217,7 +236,15 @@ namespace LoxLang
 
         public object VisitThisExpr(This expr)
         {
-            throw new NotImplementedException();
+            if (currentClass == ClassType.NONE)
+            {
+                Program.error(expr.keyword,
+                    "Can't use 'this' outside of a class.");
+                return null;
+            }
+
+            resolveLocal(expr, expr.keyword);
+            return null;
         }
 
         public object VisitUnaryExpr(Unary expr)

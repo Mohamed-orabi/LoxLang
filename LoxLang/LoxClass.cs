@@ -15,10 +15,15 @@ namespace LoxLang
         public object call(Interpreter interpreter, List<object> arguments)
         {
             LoxInstance instance = new LoxInstance(this);
+            LoxFunction initializer = findMethod("init");
+            if (initializer != null)
+            {
+                initializer.bind(instance).call(interpreter, arguments);
+            }
             return instance;
         }
 
-        public LoxFunction findMethod(String name)
+        public LoxFunction findMethod(string name)
         {
             if (_methods.ContainsKey(name))
             {
@@ -30,7 +35,9 @@ namespace LoxLang
 
         public int arity()
         {
-            return 0;
+            LoxFunction initializer = findMethod("init");
+            if (initializer == null) return 0;
+            return initializer.arity();
         }
         public override string ToString()
         {
