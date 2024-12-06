@@ -29,6 +29,32 @@ var year = 2023;
 print "Welcome to " + name + "!"; // Output: Welcome to Lox!
 ```
 
+- If
+```
+if (condition) {
+  print "yes";
+} else {
+  print "no";
+}
+```
+
+- While
+```
+var a = 1;
+while (a < 10) {
+  print a;
+  a = a + 1;
+}
+```
+
+- For
+  
+```
+for (var a = 1; a < 10; a = a + 1) {
+  print a;
+}
+```
+
 - Functions
 ```
 fun greet(name) {
