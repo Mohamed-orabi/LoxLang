@@ -58,37 +58,16 @@ print counter(); // 2
 - Classes and Objects
 
 ```
-class Person {
-  init(name) {
-    this.name = name;
-  }
-
-  sayHello() {
-    print "Hello, my name is " + this.name + ".";
+class Bacon {
+  eat() {
+    print "Crunch crunch crunch!";
   }
 }
 
-var john = Person("John");
-john.sayHello(); // Output: Hello, my name is John.
+Bacon().eat(); // Prints "Crunch crunch crunch!".
 ```
 
-- Inheritance
-```
-class Animal {
-  speak() {
-    print "I am an animal.";
-  }
-}
 
-class Dog < Animal {
-  speak() {
-    print "Woof!";
-  }
-}
-
-var dog = Dog();
-dog.speak(); // Output: Woof!
-```
 
 
 
